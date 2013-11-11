@@ -1,18 +1,16 @@
 import pyttsx
 import pygsr
 
-engine = pyttsx.init()
+def say(text):
+	engine = pyttsx.init()
 
-for v in engine.getProperty('voices'):
-	if v.name == 'spanish-latin-am':
-		engine.setProperty('rate', 170)
-		engine.setProperty('voice', v.id)
-		engine.say("Hola")
-		engine.say("Estan redis para que les coma el culo?")
-		engine.say("Cinco cuadras...")
-		engine.say("Fokin Puta")
+	for v in engine.getProperty('voices'):
+		if v.name == 'spanish-latin-am':
+			engine.setProperty('rate', 170)
+			engine.setProperty('voice', v.id)
+			engine.say(text)
 
-engine.runAndWait()
+	engine.runAndWait()
 
 
 
