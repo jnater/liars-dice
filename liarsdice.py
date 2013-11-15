@@ -1,35 +1,63 @@
+import random
+
 class Game(object):
 	
-	def __init__(self, dice_count, players, current):
+	def __init__(self, dice_count, num_players):
+		# Total number of dice in play.
 		self.dice_count = dice_count
-		self.players = players
-		#self.current is a tuple. e.g. (27,5) = 27 quinas
-		self.current = current
+		# self.players indexes the players
+		self.current = None
+		self.players = [Player() for i in range(num_players)]
 		self.position = 0
 
-	
+
+	def delete_player(self, index):
+		self.players.pop(index)
+
+	def increase_dice(self):
+		self.dice_count += 1
+
+	def decrease_dice(self):
+		self.dice_count -= 1
+
 	def step(self):
-		player = Player(sum(dice_count) - len(players[self.position]), players[self.position])
+		if self.position  == 0:
+			self.players[0].decide(current)
 		decision = player.decide(current)
 		if decision == "subo":
 			self.current[0] += 1
 			self.position = (self.position + 1) % 6
 			self.step()
 		elif decision == "calzo":
-			if dice_count[current[1] - 1] == current[0]:
-			#TODO
+			if dice_dist[current[1] - 1] == current[0]:
+			dice_count += 1
 			pass
 		else:
-			if dice_count[current[1] - 1] < current[0]:
+			if dice_dist[current[1] - 1] < current[0]:
 			#TODO
+			# players[self.position].
 			pass
+	
+	def play(self):
+		# self.speak()
+		while self.players > 1:
+			self.ronda()
+
+	def ronda(self):
+		current = None
+		self.players[0].roll()
+		if self.position  == 0:
+			decision = self.players[0].decide(current)
+			# self.say(decision)
+			# self.position += 1
+		# self.listen()
 			
 
 
 class Player(object):
 	
-	def __init__(self, outer_dice, own_dice):
-		self.outer_dice = outer_dice
+	def __init__(self, dice_count, own_dice):
+		self.outer_dice = self.dice_count - self.own_dice
 		self.own_dice = own_dice
 
 	
@@ -54,17 +82,30 @@ class Player(object):
 			return self.outer_expected(number, self.outer_dice) + self.own_dice[number - 1]
 		
 
-	def decide(current):
-		current = amount, number
-		
-		if self.expected(number) > amount:
-			return "subo"
+	def decide(self, current):
 
-		elif self.expected(number) == amount:
-			return "calzo"
-
+		n = random.randint(1,6)
+		if current == None:
+			return self.exptected(n)
 		else:
-			return "bullshit"
+			current = amount, number
+		
+			if self.expected(number) > amount:
+				return "subo"
+
+			elif self.expected(number) == amount:
+				return "calzo"
+
+			else:
+				return "bullshit"
+
+	def roll(self, n):
+		#TODO
+		pass
+
+	def print_hand(self):
+		#TODO
+		pass
 		
 		
 			
