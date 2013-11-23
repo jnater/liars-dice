@@ -1,6 +1,31 @@
 import os
+import pyttsx
+import pygsr
 from pygsr import Pygsr
 from contextlib import contextmanager
+
+def say(text):
+	engine = pyttsx.init()
+
+	for v in engine.getProperty('voices'):
+		if v.name == 'spanish-latin-am':
+			engine.setProperty('rate', 200)
+			engine.setProperty('voice', v.id)
+			engine.say(text)
+
+	engine.runAndWait()
+
+def record():
+	print "REC:"
+	with suppress_stdout_stderr():
+		speech = Pygsr()
+		speech.record(3) # duration in seconds (3)
+		try:
+			phrase, complete_response = speech.speech_to_text('es_ES') # select the language
+			return phrase
+		except:
+			return None
+
 
 class suppress_stdout_stderr(object):
     '''
@@ -31,12 +56,3 @@ class suppress_stdout_stderr(object):
         os.close(self.null_fds[0])
         os.close(self.null_fds[1])
 
-def listen():
-	with suppress_stdout_stderr():
-		speech = Pygsr()
-		speech.record(3) # duration in seconds (3)
-		try:
-			phrase, complete_response = speech.speech_to_text('es_ES') # select the language
-			return phrase
-		except:
-			return None
