@@ -1,5 +1,37 @@
 import random
+from getch import getch
+from stt import *
 
+# ============= HELPER FUNCTIONS
+def ask(prompt, function):
+	say(prompt)
+	x = None
+	while(x == None):
+		sound = record()
+		print sound
+		try:
+			x = function(sound)
+			return x
+		except Exception:
+			i = random.randint(0, len(SAY_AGAIN_PROMPTS)-1)
+			say(SAY_AGAIN_PROMPTS[i])
+	
+def parseBet(string):
+	return (3, 4)
+
+def parseDecision(string):
+	if string == None:
+		return Exception
+	elif "u" in string.lower():
+		return "bullshit"
+	elif "calzo" in string.lower():
+		return "calzo"
+	else:
+		print string, "?"
+		return None
+# ================================
+		
+# ===================== GAME CLASS
 class Game(object):
 	
 	def __init__(self, dice_count, num_players):
@@ -7,7 +39,7 @@ class Game(object):
 		self.dice_count = dice_count
 		# self.players indexes the players
 		self.current = None
-		self.players = [Player() for i in range(num_players)]
+		self.players = [Player(dice_count, dice_count/num_players) for i in range(num_players)]
 		self.position = 0
 
 
@@ -30,17 +62,17 @@ class Game(object):
 			self.step()
 		elif decision == "calzo":
 			if dice_dist[current[1] - 1] == current[0]:
-			dice_count += 1
-			pass
+				dice_count += 1
 		else:
 			if dice_dist[current[1] - 1] < current[0]:
 			#TODO
 			# players[self.position].
-			pass
+				pass
 	
 	def play(self):
 		# self.speak()
 		while self.players > 1:
+			self.printGameState()
 			self.ronda()
 
 	def ronda(self):
@@ -48,47 +80,94 @@ class Game(object):
 		self.players[0].roll()
 		if self.position  == 0:
 			decision = self.players[0].decide(current)
-			# self.say(decision)
-			# self.position += 1
-		# self.listen()
+			say(decision)
+			self.position += 1
+		self.listen()
+
+	def listen(self):
+		print "Waiting for my turn... Usage:\n\t- 'e' if the round ended\n\t- 'spacebar' if its my turn\n\t- 'y' if I start"
+		x = getch()
+		if x == "y":
+			self.position = 0
+		elif x == " ":
+			# Listen and decide on previous player's bet
+			play = ask(" ", parseBet)
+			decision = self.players[0].decide(play)
+			say(decision)
+			print "Waiting for next player to decide... Press 'spacebar' for me to listen."
+			x = getch()
+			if x == " ":
+				recorded = ask("Que es lo que crees?", parseDecision)
+				if recorded == "bullshit":
+					say("buuuulcheet?")
+					self.endRound()
+				else:
+					return self.listen()
+		elif x == "e":
+			return self.endRound()
+		elif x == "d":
+			return None
+		else:
+			print x, "?"
+			return self.listen()
+
+	def endRound(self):
+		print "=== END OF ROUND ==="
+		#show hands TODO: CHANGE TO MULTIPLE PLAYERS LATER IF SIMULATING
+		self.players[0].print_hand()
+		print "What happened? Usage:\n\t- 'l' if someone lost a die\n\t- 'w' if someone won a die\n\t- 'y' if I lost a die."
+		x = getch()
+		if x == "l":
+			print "Player lost a die"
+			self.dice_count -= 1
+		elif x == "w":
+			print "Player won a die"
+			self.dice_count += 1
+		return None
+
+	def printGameState(self):
+		print "======================="
+		print "Players left ", len(self.players)
+		print "Dice left ", self.dice_count
+		print "======================="
 			
 
 
 class Player(object):
 	
 	def __init__(self, dice_count, own_dice):
-		self.outer_dice = self.dice_count - self.own_dice
+		self.outer_dice = dice_count - own_dice
 		self.own_dice = own_dice
+		self.hand = [0]*own_dice
 
 	
 	def outer_expected(self, number):
 		n = self.outer_dice/6
 		r = self.outer_dice % 2
 		if number == 1:		
-			if r >3:
+			if r > 3:
 				return n + 1
 			else: 
 				return n
 		else:
 			if 1 < r < 5:
-				return 2n + 1
+				return 2*n + 1
 			elif r == 5:
-				return 2n + 2
-			
+				return 2*n + 2
 			else:
-				return 2n
+				return 2*n
 	
 	def expected(self, number):
-			return self.outer_expected(number, self.outer_dice) + self.own_dice[number - 1]
+			return self.outer_expected(number) + self.hand.count(number)
 		
 
 	def decide(self, current):
-
 		n = random.randint(1,6)
 		if current == None:
-			return self.exptected(n)
+			return str(self.expected(n))+" "+str(n)
 		else:
-			current = amount, number
+			print current
+			amount, number = current
 		
 			if self.expected(number) > amount:
 				return "subo"
@@ -99,13 +178,19 @@ class Player(object):
 			else:
 				return "bullshit"
 
-	def roll(self, n):
-		#TODO
-		pass
+	def roll(self):
+		random.seed() # Seeds with current time
+		self.hand = []
+		for i in range(self.own_dice):
+			self.hand.append(random.randint(1, 6))
+		print "=== Perudo Rolled Dice ==="
+		return self.hand
 
 	def print_hand(self):
-		#TODO
-		pass
+		print "====="
+		print self.hand
+		print "====="
+
 		
 		
 			
