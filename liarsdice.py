@@ -22,7 +22,7 @@ def parseBet(string):
 def parseDecision(string):
 	if string == None:
 		return Exception
-	elif "u" in string.lower():
+	elif "bullshit" in string.lower():
 		return "bullshit"
 	elif "calzo" in string.lower():
 		return "calzo"
@@ -109,7 +109,7 @@ class Game(object):
 			return None
 		else:
 			print x, "?"
-			return self.listen()
+			return None
 
 	def endRound(self):
 		print "=== END OF ROUND ==="
@@ -143,7 +143,7 @@ class Player(object):
 	
 	def outer_expected(self, number):
 		n = self.outer_dice/6
-		r = self.outer_dice % 2
+		r = self.outer_dice % 6
 		if number == 1:		
 			if r > 3:
 				return n + 1
@@ -158,11 +158,15 @@ class Player(object):
 				return 2*n
 	
 	def expected(self, number):
-			return self.outer_expected(number) + self.hand.count(number)
+			x = self.outer_expected(number) + self.hand.count(number)
+			if number != 1: x += self.hand.count(1)
+			return x
 		
 
 	def decide(self, current):
-		n = random.randint(1,6)
+		# Choose the number for which you have the most.
+		dice = [(i, self.hand.count(i)) for i in range(1, 7)]
+		n = sorted(dice, key=lambda x: -x[1])[0][0]
 		if current == None:
 			return str(self.expected(n))+" "+str(n)
 		else:
