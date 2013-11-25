@@ -191,8 +191,10 @@ class Player(object):
 		return self.hand
 
 	def print_hand(self):
+		d = {1: u'⚀', 2:u'⚁', 3:u'⚂', 4:u'⚃', 5:u'⚄', 6:u'⚅'}
+		hand = [d[i] for i in self.hand]
 		print "====="
-		print self.hand
+		print repr(hand).decode("unicode-escape")
 		print "====="
 
 		
